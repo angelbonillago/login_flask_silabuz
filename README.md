@@ -61,6 +61,20 @@ flask db migrate -m "Initial migration."
 flask db upgrade
 ```
 
+
+### Crear los roles
+Ingresar a la shell de Flask
+
+```bash
+flask shell
+ >> Role.insert_roles()
+
+```
+Verificar la tabla 'role'
+
+### Crearse un usuario
+Ingresar al archivo 'app.py' y  crear un usuario.
+
 # SQLALCHEMY_DATABASE_URI
 
 Algunas formas de `SQLALCHEMY_DATABASE_URI`:

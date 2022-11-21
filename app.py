@@ -2,12 +2,14 @@ from flask import Flask,render_template,redirect,url_for,flash,request
 from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_login import current_user, login_user,login_required
-from forms import LoginForm,EditProfileForm
+from forms import LoginForm,EditProfileForm,PostForm
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_login import logout_user
 import hashlib
 from flask_moment import Moment
+
+from werkzeug.urls import url_parse
 
 
 
@@ -24,10 +26,13 @@ db=SQLAlchemy(app)
 Migrate(app,db)
 moment = Moment(app)
 
-@app.route('/')
+
+
+@app.route('/conblueprint')
 @login_required #tiene que tener la sesion iniciada
-def index():
-    return render_template('indexCss.html') #para pooder ver este indexCss.html
+def index_():
+    posts = Post.query.all()
+    return render_template('indexCss.html',post=posts) #para pooder ver este indexCss.html
 
 @app.route('/logout')
 def logout():
@@ -109,7 +114,7 @@ def usuario_noencontrado():
 
 @app.route('/usuario/<username>')
 @login_required
-def informacion_usuario(username):
+def user(username):
     #WHERE
     obj_usuario=User.query.filter_by(username=username).first_or_404()
     return render_template('usuario/perfil.html',usuario =obj_usuario)
@@ -129,13 +134,27 @@ def edit_profile():
         db.session.commit()
 
         flash('Tu perfil se actualizó correctamente.')
-        return redirect(url_for('.informacion_usuario', username=current_user.username))
+        return redirect(url_for('.user', username=current_user.username))
 
     form.name.data = current_user.name
     form.location.data = current_user.location
     form.about_me.data = current_user.about_me
 
     return render_template('usuario/editar_perfil.html', form=form)
+
+
+@app.route('/', methods = ['GET', 'POST'])
+@login_required
+def index():
+    # Añadimos los post
+    form = PostForm()
+    if current_user.can(Permission.WRITE) and form.validate_on_submit():
+        post = Post(body=form.body.data, author=current_user._get_current_object())
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('index'))
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template("index.html", form = form, posts = posts, WRITE = Permission.WRITE)
 
 
 
