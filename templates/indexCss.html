@@ -1,0 +1,24 @@
+{% extends 'base.html'%}
+{% block content %} 
+
+
+<div>
+    Microblog:
+    <a href="{{ url_for('index') }}">Home</a>
+    {% if current_user.is_anonymous %}
+    <a href="{{ url_for('login') }}">Login</a>
+    {% else %}
+    <a href="{{ url_for('logout') }}">Logout</a>
+    {% endif %}
+    </div>
+
+    <br>
+    <h1>Bienvido {{current_user.username}}</h1>
+    <p>Avatar 
+        <img class="img" src="{{ current_user.avatar }}" />
+    
+    </p>
+
+
+
+{% endblock %}
